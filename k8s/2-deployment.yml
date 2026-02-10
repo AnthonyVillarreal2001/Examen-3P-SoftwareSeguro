@@ -132,6 +132,8 @@ spec:
           image: anvillarreal/socios:latest
           imagePullPolicy: IfNotPresent
           env:
+            - name: CUENTAS_SERVICE_URL
+              value: http://microservicio-cuentas:3000
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://postgres-socios:5432/cooperativa_socios?createDatabaseIfNotExist=true
             - name: SPRING_DATASOURCE_USERNAME
