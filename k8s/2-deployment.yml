@@ -161,6 +161,6 @@ spec:
       containers:
         - name: frontend
           image: anvillarreal/frontend:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
