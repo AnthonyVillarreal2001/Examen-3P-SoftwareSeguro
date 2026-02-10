@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cooperativa-api-ingress
+  namespace: cooperativa
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cooperativa.local
+      http:
+        paths:
+          - path: /cuentas(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: microservicio-cuentas
+                port:
+                  number: 3000
+          - path: /socios(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: socios
+                port:
+                  number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cooperativa-frontend-ingress
+  namespace: cooperativa
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cooperativa.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

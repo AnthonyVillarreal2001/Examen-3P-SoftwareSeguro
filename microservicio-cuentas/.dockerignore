@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+coverage
+dist
+.mysql-data
+mysql-data
+cypress
+formularios
+.git
+.gitignore
+Dockerfile
+*.zip
+*.log

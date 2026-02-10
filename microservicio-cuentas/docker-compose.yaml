@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: cooperativa-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: cooperativa_cuentas
+      MYSQL_USER: cooperativa_user
+      MYSQL_PASSWORD: cooperativa123
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3306:3306"
+      - "33060:33060"  # Para herramientas externas
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d  # Para scripts de inicialización
+    networks:
+      - cooperativa-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      timeout: 20s
+      retries: 10
+      start_period: 40s
+    command: 
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max_connections=1000
+      - --innodb_buffer_pool_size=256M
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+
+  mysql-admin:
+    image: phpmyadmin/phpmyadmin
+    container_name: mysql-admin
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+      UPLOAD_LIMIT: 256M
+    ports:
+      - "8081:80"
+    networks:
+      - cooperativa-network
+
+volumes:
+  mysql_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./mysql-data
+      o: bind
+
+networks:
+  cooperativa-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-cooperativa
