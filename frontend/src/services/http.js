@@ -31,6 +31,10 @@ export function getApiBase(kind) {
   const isLocalhost =
     typeof window !== 'undefined' &&
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+  const port = typeof window !== 'undefined' ? window.location.port : '';
+  const isIngressHost =
+    !isLocalhost && (hostname === 'cooperativa.local' || port === '' || port === '80' || port === '443');
 
   const resolveEnvBase = (value) => {
     if (!value) {
@@ -54,14 +58,22 @@ export function getApiBase(kind) {
   if (kind === 'socios') {
     return (
       resolveEnvBase(import.meta.env.VITE_API_SOCIOS) ||
-      (isLocalhost ? 'http://localhost:8080/api/socios' : `${window.location.origin}/socios`)
+      (isLocalhost
+        ? 'http://localhost:8080/api/socios'
+        : isIngressHost
+          ? `${window.location.origin}/socios`
+          : `http://${hostname}:8080/api/socios`)
     );
   }
 
   if (kind === 'cuentas') {
     return (
       resolveEnvBase(import.meta.env.VITE_API_CUENTAS) ||
-      (isLocalhost ? 'http://localhost:3000/cuentas' : `${window.location.origin}/cuentas`)
+      (isLocalhost
+        ? 'http://localhost:3000/cuentas'
+        : isIngressHost
+          ? `${window.location.origin}/cuentas`
+          : `http://${hostname}:3000/cuentas`)
     );
   }
 
@@ -70,7 +82,9 @@ export function getApiBase(kind) {
       resolveEnvBase(import.meta.env.VITE_API_CUENTAS_VALIDACION) ||
       (isLocalhost
         ? 'http://localhost:3000/api/cuentas/validaciones'
-        : `${window.location.origin}/cuentas/validaciones`)
+        : isIngressHost
+          ? `${window.location.origin}/cuentas/validaciones`
+          : `http://${hostname}:3000/api/cuentas/validaciones`)
     );
   }
 
