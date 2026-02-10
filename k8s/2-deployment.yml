@@ -130,7 +130,7 @@ spec:
       containers:
         - name: socios
           image: anvillarreal/socios:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           env:
             - name: CUENTAS_SERVICE_URL
               value: http://microservicio-cuentas:3000
