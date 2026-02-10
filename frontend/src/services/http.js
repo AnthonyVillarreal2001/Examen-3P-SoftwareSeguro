@@ -61,7 +61,7 @@ export function getApiBase(kind) {
       (isLocalhost
         ? 'http://localhost:8080/api/socios'
         : isIngressHost
-          ? `${window.location.origin}/socios`
+          ? `${window.location.origin}/socios/api/socios`
           : `http://${hostname}:8080/api/socios`)
     );
   }
@@ -72,7 +72,7 @@ export function getApiBase(kind) {
       (isLocalhost
         ? 'http://localhost:3000/cuentas'
         : isIngressHost
-          ? `${window.location.origin}/cuentas`
+          ? `${window.location.origin}/cuentas/cuentas`
           : `http://${hostname}:3000/cuentas`)
     );
   }
@@ -83,7 +83,7 @@ export function getApiBase(kind) {
       (isLocalhost
         ? 'http://localhost:3000/api/cuentas/validaciones'
         : isIngressHost
-          ? `${window.location.origin}/cuentas/validaciones`
+          ? `${window.location.origin}/cuentas/api/cuentas/validaciones`
           : `http://${hostname}:3000/api/cuentas/validaciones`)
     );
   }
