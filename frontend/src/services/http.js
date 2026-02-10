@@ -26,3 +26,34 @@ export async function requestJson(url, options = {}) {
 
   return payload;
 }
+
+export function getApiBase(kind) {
+  const isLocalhost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  if (kind === 'socios') {
+    return (
+      import.meta.env.VITE_API_SOCIOS ||
+      (isLocalhost ? 'http://localhost:8080/api/socios' : `${window.location.origin}/socios`)
+    );
+  }
+
+  if (kind === 'cuentas') {
+    return (
+      import.meta.env.VITE_API_CUENTAS ||
+      (isLocalhost ? 'http://localhost:3000/cuentas' : `${window.location.origin}/cuentas`)
+    );
+  }
+
+  if (kind === 'cuentas-validacion') {
+    return (
+      import.meta.env.VITE_API_CUENTAS_VALIDACION ||
+      (isLocalhost
+        ? 'http://localhost:3000/api/cuentas/validaciones'
+        : `${window.location.origin}/cuentas/validaciones`)
+    );
+  }
+
+  throw new Error(`Unknown API base kind: ${kind}`);
+}

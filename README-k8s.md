@@ -73,6 +73,21 @@ Reinicia sesion para aplicar el grupo docker:
 newgrp docker
 ```
 
+## 1.1) Descargar el proyecto (si la VM no tiene nada)
+
+En la VM donde vas a levantar Minikube, instala git y clona el repo:
+
+```bash
+sudo apt update
+sudo apt install -y git
+
+# reemplaza <REPO_URL> por tu URL (GitHub, GitLab, etc.)
+git clone <REPO_URL>
+cd Examen-3P-SoftwareSeguro
+```
+
+Si no tienes el repo en remoto, copia la carpeta del proyecto a la VM y ejecuta los comandos desde la raiz.
+
 ## 2) Iniciar Minikube
 
 ```bash
@@ -146,10 +161,21 @@ URLs:
 
 ## 6) Cambiar URLs del frontend (si cambias puertos)
 
-El frontend usa variables Vite. Estan en los Docker build args y en runtime se resuelven a:
-- VITE_API_SOCIOS (default: http://localhost:8080/api/socios)
-- VITE_API_CUENTAS (default: http://localhost:3000/cuentas)
-- VITE_API_CUENTAS_VALIDACION (default: http://localhost:3000/api/cuentas/validaciones)
+El frontend ahora detecta el entorno en runtime:
+
+- Si se abre en `localhost` o `127.0.0.1`, usa:
+  - http://localhost:8080/api/socios
+  - http://localhost:3000/cuentas
+  - http://localhost:3000/api/cuentas/validaciones
+- Si se abre en otro host (ej. `cooperativa.local`), usa rutas del Ingress:
+  - /socios
+  - /cuentas
+  - /cuentas/validaciones
+
+Si necesitas forzar otra URL, puedes usar variables Vite en el build:
+- VITE_API_SOCIOS
+- VITE_API_CUENTAS
+- VITE_API_CUENTAS_VALIDACION
 
 Si necesitas otros puertos, debes reconstruir la imagen del frontend con estos args y volver a subirla.
 
@@ -176,3 +202,68 @@ docker build \
   minikube stop
   minikube start
   ```
+
+## 8) Dos VMs (Kali y Ubuntu) en la misma red
+
+Recomendado: levantar Minikube solo en UNA VM (Ubuntu) y consumir desde Kali.
+
+### 8.1) Red de VirtualBox
+
+Ambas VMs deben estar en la misma red (NAT Network o Host-Only). La red NAT por defecto (10.0.2.x) no permite comunicacion directa entre VMs.
+
+- Ubuntu Desktop: 10.0.2.15
+- Kali Linux: 10.0.2.6
+
+Prueba conectividad desde Kali:
+```bash
+ping 10.0.2.15
+```
+
+### 8.2) Levantar el cluster en Ubuntu (10.0.2.15)
+
+En Ubuntu:
+```bash
+minikube start
+minikube addons enable ingress
+
+kubectl apply -f k8s/1-namespace.yml
+kubectl apply -f k8s/2-deployment.yml
+kubectl apply -f k8s/3-service.yml
+kubectl apply -f k8s/4-ingress.yml
+```
+
+### 8.3) Acceso desde Kali
+
+Opcion A (Ingress):
+1) En Ubuntu, obtiene la IP del cluster:
+```bash
+minikube ip
+```
+2) En Kali, edita `/etc/hosts`:
+```
+<MINIKUBE_IP> cooperativa.local
+```
+3) Prueba en Kali:
+- http://cooperativa.local/
+- http://cooperativa.local/cuentas/api-docs
+- http://cooperativa.local/socios/swagger-ui.html
+
+Opcion B (port-forward):
+En Ubuntu, expone los puertos a toda la red:
+```bash
+kubectl port-forward -n cooperativa svc/frontend 8085:80 --address 0.0.0.0
+kubectl port-forward -n cooperativa svc/microservicio-cuentas 3000:3000 --address 0.0.0.0
+kubectl port-forward -n cooperativa svc/socios 8080:8080 --address 0.0.0.0
+```
+
+Desde Kali, usa la IP de Ubuntu:
+- http://10.0.2.15:8085/
+- http://10.0.2.15:3000/api-docs
+- http://10.0.2.15:8080/api/socios
+
+Si no abre, revisa firewall en Ubuntu:
+```bash
+sudo ufw allow 8085/tcp
+sudo ufw allow 3000/tcp
+sudo ufw allow 8080/tcp
+```

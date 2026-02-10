@@ -1,8 +1,7 @@
-import { requestJson } from './http';
+import { requestJson, getApiBase } from './http';
 
-const CUENTAS_BASE = import.meta.env.VITE_API_CUENTAS || 'http://localhost:3000/cuentas';
-const VALIDACION_BASE =
-  import.meta.env.VITE_API_CUENTAS_VALIDACION || 'http://localhost:3000/api/cuentas/validaciones';
+const CUENTAS_BASE = getApiBase('cuentas');
+const VALIDACION_BASE = getApiBase('cuentas-validacion');
 
 export const cuentasApi = {
   createCuenta(payload) {

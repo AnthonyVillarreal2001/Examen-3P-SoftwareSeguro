@@ -1,6 +1,6 @@
-import { requestJson } from './http';
+import { requestJson, getApiBase } from './http';
 
-const SOCIOS_BASE = import.meta.env.VITE_API_SOCIOS || 'http://localhost:8080/api/socios';
+const SOCIOS_BASE = getApiBase('socios');
 
 export const sociosApi = {
   createSocio(payload) {
